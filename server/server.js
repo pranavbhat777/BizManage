@@ -41,7 +41,8 @@ const corsOptions = {
         // Allow mobile apps (Capacitor)
         'capacitor://localhost',
         'http://localhost',
-        'ionic://localhost'
+        'ionic://localhost',
+        'https://lucent-pegasus-16ea4c.netlify.app'
       ];
       
       // Check if origin is allowed
