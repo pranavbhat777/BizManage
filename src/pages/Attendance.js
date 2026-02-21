@@ -11,11 +11,6 @@ import {
   TableHead,
   TableRow,
   Button,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   Grid,
   FormControl,
@@ -29,7 +24,11 @@ import {
   Card,
   CardContent,
   ToggleButton,
-  ToggleButtonGroup
+  ToggleButtonGroup,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -165,7 +164,7 @@ const Attendance = () => {
   useEffect(() => {
     fetchEmployees();
     fetchAttendance();
-  }, [fetchEmployees, fetchAttendance]);
+  }, [token, selectedDate]);
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
