@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Box, CssBaseline, useTheme, useMediaQuery } from '@mui/material';
 import Sidebar from './components/Sidebar';
-import Dashboard from './pages/Dashboard';
 import Employees from './pages/Employees';
 import Attendance from './pages/Attendance';
 import Overtime from './pages/Overtime';
@@ -152,7 +151,7 @@ function AppContent({ mobileOpen, handleDrawerToggle, handleSidebarToggle, handl
           width: '100%'
         }}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Employees />} />
             <Route path="/employees" element={<Employees />} />
             <Route path="/attendance" element={<Attendance />} />
             <Route path="/overtime" element={<Overtime />} />
