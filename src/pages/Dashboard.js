@@ -4,30 +4,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { Box, Grid, Paper, Typography, CircularProgress, Fab, Zoom } from '@mui/material';
 import {
   People as PeopleIcon,
-  EventAvailable as EventAvailableIcon,
-  AttachMoney as AttachMoneyIcon,
-  AccountBalanceWallet as AccountBalanceWalletIcon,
-  Refresh as RefreshIcon,
-  TrendingUp as TrendingUpIcon,
-  Warning as WarningIcon,
   TableChart as TableChartIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-  BarChart,
-  Bar
-} from 'recharts';
 
 const StatCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -87,12 +66,6 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState({
     totalEmployees: 0,
     todayAttendance: { present: 0, absent: 0, half_day: 0, late: 0 },
-    weeklyPayroll: { totalAmount: 0, pendingAmount: 0, paidAmount: 0 },
-    monthlyPayroll: { totalAmount: 0, pendingAmount: 0, paidAmount: 0 },
-    totalAdvances: 0,
-    pendingAdvances: 0,
-    lowStockItems: 0,
-    totalProducts: 0,
     totalValueProduced: 0,
     totalValuePurchased: 0,
     totalValueSold: 0
@@ -245,9 +218,6 @@ const Dashboard = () => {
     ];
   };
 
-  const prepareOvertimeTrendData = () => {
-    if (!dashboardData) return [];
-    
     // Generate sample overtime trend data for the last 4 weeks
     return [
       { week: 'Week 1', hours: 25, amount: 3750 },
