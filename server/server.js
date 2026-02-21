@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
+const compression = require('compression');
 
 const authRoutes = require('./routes/auth');
 const employeeRoutes = require('./routes/employees');
@@ -15,6 +16,79 @@ const businessRoutes = require('./routes/business');
 const productRoutes = require('./routes/products');
 const cashbookRoutes = require('./routes/cashbook');
 const insuranceRoutes = require('./routes/insurance');
+
+// Initialize database
+const db = require('./config/database');
+
+// Ensure database exists and is initialized
+const initializeDatabase = async () => {
+  try {
+    console.log('🔧 Initializing database...');
+    
+    // Test database connection
+    await db.raw('SELECT 1');
+    console.log('✅ Database connection successful');
+    
+    // Check if employees table exists
+    const hasEmployees = await db.schema.hasTable('employees');
+    if (!hasEmployees) {
+      console.log('📋 Creating employees table...');
+      await db.schema.createTable('employees', (table) => {
+        table.increments('id').primary();
+        table.integer('business_id').notNullable();
+        table.string('first_name').notNullable();
+        table.string('last_name').notNullable();
+        table.string('email').notNullable().unique();
+        table.string('phone');
+        table.string('position');
+        table.decimal('salary', 10, 2);
+        table.date('hire_date');
+        table.boolean('active').defaultTo(true);
+        table.timestamps(true, true);
+      });
+      console.log('✅ Employees table created');
+    }
+    
+    // Check if there are any employees
+    const employeesCount = await db('employees').count('* as count').first();
+    if (employeesCount.count === 0) {
+      console.log('📝 Adding sample employees...');
+      await db('employees').insert([
+        {
+          business_id: 1,
+          first_name: 'John',
+          last_name: 'Doe',
+          email: 'john@company.com',
+          phone: '+1234567890',
+          position: 'Manager',
+          salary: 50000.00,
+          hire_date: new Date().toISOString().split('T')[0],
+          active: true,
+          created_at: new Date(),
+          updated_at: new Date()
+        },
+        {
+          business_id: 1,
+          first_name: 'Jane',
+          last_name: 'Smith',
+          email: 'jane@company.com',
+          phone: '+0987654321',
+          position: 'Developer',
+          salary: 60000.00,
+          hire_date: new Date().toISOString().split('T')[0],
+          active: true,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ]);
+      console.log('✅ Sample employees added');
+    }
+    
+    console.log('🎉 Database initialization complete');
+  } catch (error) {
+    console.error('❌ Database initialization error:', error);
+  }
+};
 
 const app = express();
 
@@ -137,10 +211,16 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+// Initialize database before starting server
+initializeDatabase().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log('🔗 Health check: http://localhost:' + PORT + '/api/health');
+  });
+}).catch(error => {
+  console.error('❌ Failed to start server:', error);
+  process.exit(1);
 });
 
 module.exports = app;
