@@ -24,10 +24,8 @@ import {
 import {
   Add as AddIcon,
   Remove as RemoveIcon,
-  Person as PersonIcon,
-  DateRange as DateRangeIcon
+  Person as PersonIcon
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 const Advances = () => {
   const [advances, setAdvances] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -43,7 +41,6 @@ const Advances = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAdvance, setEditingAdvance] = useState(null);
   
-  const navigate = useNavigate();
   // Fetch employees for dropdown
   const fetchEmployees = async () => {
     try {

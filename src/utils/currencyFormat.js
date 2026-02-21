@@ -126,9 +126,11 @@ export const parseIndianCurrency = (formattedString) => {
   return isNaN(num) ? 0 : num;
 };
 
-export default {
+const currencyFormat = {
   formatIndianCurrency,
   formatCurrencyWithSign,
   formatIndianWithUnits,
   parseIndianCurrency
 };
+
+export default currencyFormat;

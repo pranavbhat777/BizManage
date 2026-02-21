@@ -3,7 +3,6 @@ const getApiBaseUrl = () => {
   // If running in browser and not localhost, use current domain (for tunnels)
   if (typeof window !== 'undefined') {
     const currentHost = window.location.hostname;
-    const currentProtocol = window.location.protocol;
     
     // If accessed via tunnel (non-localhost), use same domain
     if (!currentHost.includes('localhost') && !currentHost.includes('127.0.0.1')) {

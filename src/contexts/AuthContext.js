@@ -4,8 +4,8 @@ import React, { createContext, useContext, useState } from 'react';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [business, setBusiness] = useState({
+  const [user] = useState(null);
+  const [business] = useState({
     id: 1,
     name: 'Test Business',
     email: 'test@business.com',
