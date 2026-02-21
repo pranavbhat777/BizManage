@@ -1,0 +1,39 @@
+services:
+  # Backend API Service
+  - type: web
+    name: bizmanage-api
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: DATABASE_PATH
+        value: ./database.sqlite
+      - key: BUSINESS_NAME
+        value: BizManage
+      - key: BUSINESS_EMAIL
+        value: admin@bizmanage.com
+      - key: BCRYPT_ROUNDS
+        value: '12'
+      - key: RATE_LIMIT_WINDOW_MS
+        value: '900000'
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: '1000'
+    # Health check endpoint
+    healthCheckPath: /api/health
+    # Auto-deploy on git push
+    autoDeploy: true
+    # Persistent disk for database
+    disk:
+      name: bizmanage-data
+      mountPath: /opt/render/project/src/server
+      sizeGB: 1

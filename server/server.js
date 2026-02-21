@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -22,12 +23,53 @@ app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? 'https://your-production-domain.com' 
-    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002', 'http://127.0.0.1:56129'],
-  credentials: true
-}));
+// CORS configuration - Allow dynamic origins for sharing
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (process.env.NODE_ENV === 'production') {
+      // In production, allow Render domains and specific frontend domains
+      const allowedOrigins = [
+        process.env.FRONTEND_URL || 'https://your-production-domain.com',
+        'https://vercel.app',
+        /\.vercel\.app$/,
+        // Allow Render domains
+        /\.onrender\.com$/,
+        'https://render.com',
+        // Allow mobile apps (Capacitor)
+        'capacitor://localhost',
+        'http://localhost',
+        'ionic://localhost'
+      ];
+      
+      // Check if origin is allowed
+      const isAllowed = allowedOrigins.some(allowedOrigin => {
+        if (allowedOrigin instanceof RegExp) {
+          return allowedOrigin.test(origin);
+        }
+        return allowedOrigin === origin;
+      });
+      
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    } else {
+      // In development, allow all origins for easy sharing
+      console.log('🌍 Allowing origin:', origin);
+      callback(null, true);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Platform'],
+  exposedHeaders: ['X-Platform']
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -41,9 +83,11 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/auth', authRoutes);
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../build')));
 
+// API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/overtime', overtimeRoutes);
@@ -59,8 +103,21 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV 
+    environment: process.env.NODE_ENV,
+    server_url: `${req.protocol}://${req.get('host')}`,
+    frontend_url: `${req.protocol}://${req.get('host')}`
   });
+});
+
+// SPA routing fallback - serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  // Don't intercept API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ message: 'API endpoint not found' });
+  }
+  
+  // Serve index.html for all other routes (SPA routing)
+  res.sendFile(path.join(__dirname, '../build/index.html'));
 });
 
 // Error handling middleware

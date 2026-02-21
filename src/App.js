@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Box, CssBaseline, useTheme, useMediaQuery } from '@mui/material';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
@@ -14,6 +14,7 @@ import Insurance from './pages/Insurance';
 import Login from './pages/Login';
 import TopBar from './components/TopBar';
 import { AuthProvider } from './contexts/AuthContext';
+import { isCapacitorApp } from './utils/api';
 
 const drawerWidth = 250; // Expanded width for desktop
 const collapsedWidth = 70; // Collapsed width for desktop
@@ -22,6 +23,51 @@ function App() {
   const [mobileOpen, setMobileOpen] = useState(false); // Mobile drawer state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // Desktop collapse state
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Handle deep linking for mobile app
+  useEffect(() => {
+    // Handle deep links from mobile app
+    const handleDeepLink = (path) => {
+      console.log('🔗 Deep link received:', path);
+      // Navigate to the deep link path
+      if (path && path.startsWith('/')) {
+        navigate(path);
+      }
+    };
+
+    // Handle app links from mobile app
+    const handleAppLink = (path) => {
+      console.log('🌐 App link received:', path);
+      // Navigate to the app link path
+      if (path && path.startsWith('/')) {
+        navigate(path);
+      }
+    };
+
+    // Make functions available globally for mobile app
+    if (isCapacitorApp()) {
+      window.handleDeepLink = handleDeepLink;
+      window.handleAppLink = handleAppLink;
+      
+      // Check for initial deep link on app start
+      const urlParams = new URLSearchParams(window.location.search);
+      const deepLinkPath = urlParams.get('deep_link');
+      if (deepLinkPath) {
+        handleDeepLink(deepLinkPath);
+      }
+    }
+
+    return () => {
+      // Cleanup global functions
+      if (window.handleDeepLink) {
+        delete window.handleDeepLink;
+      }
+      if (window.handleAppLink) {
+        delete window.handleAppLink;
+      }
+    };
+  }, [navigate]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);

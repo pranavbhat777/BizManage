@@ -27,6 +27,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { API_URL, api } from '../utils/api';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   maxWidth: 500,
@@ -86,35 +87,24 @@ const Login = () => {
     console.log('Login form submitted:', loginForm);
     
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginForm)
-      });
+      const data = await api.post('/api/auth/login', loginForm);
       
-      console.log('Login response status:', response.status);
-      const data = await response.json();
       console.log('Login response data:', data);
       
-      if (response.ok) {
+      if (data.token) {
         console.log('Login successful, storing data...');
         login(data.token, data.business);
         setSnackbar({ open: true, message: 'Login successful!', severity: 'success' });
         console.log('About to navigate to /');
-        // Add a small delay to ensure state is updated
         setTimeout(() => {
-          console.log('Navigating after delay...');
-          navigate('/', { replace: true });
-        }, 100);
+          navigate('/');
+        }, 1000);
       } else {
-        console.log('Login failed:', data.message);
         setSnackbar({ open: true, message: data.message || 'Login failed', severity: 'error' });
       }
     } catch (error) {
       console.error('Login error:', error);
-      setSnackbar({ open: true, message: 'Login failed. Please try again.', severity: 'error' });
+      setSnackbar({ open: true, message: error.message || 'Login failed', severity: 'error' });
     }
   };
 
@@ -131,45 +121,27 @@ const Login = () => {
     
     try {
       console.log('Making registration request...');
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: registerForm.name,
-          phone: registerForm.phone,
-          password: registerForm.password
-        })
+      const data = await api.post('/api/auth/register', {
+        name: registerForm.name,
+        phone: registerForm.phone,
+        password: registerForm.password
       });
       
-      console.log('Response status:', response.status);
-      const data = await response.json();
-      console.log('Response data:', data);
+      console.log('Registration response data:', data);
       
-      if (response.ok) {
+      if (data.token) {
         console.log('Registration successful, storing data...');
         login(data.token, data.business);
         setSnackbar({ open: true, message: 'Registration successful!', severity: 'success' });
-        console.log('About to navigate to /');
-        // Add a small delay to ensure state is updated
         setTimeout(() => {
-          console.log('Navigating after delay...');
-          navigate('/', { replace: true });
-        }, 100);
+          navigate('/');
+        }, 1000);
       } else {
-        console.log('Registration failed:', data);
-        // Handle validation errors array
-        if (data.errors && data.errors.length > 0) {
-          const errorMessage = data.errors.map(err => err.msg).join(', ');
-          setSnackbar({ open: true, message: errorMessage, severity: 'error' });
-        } else {
-          setSnackbar({ open: true, message: data.message || 'Registration failed', severity: 'error' });
-        }
+        setSnackbar({ open: true, message: data.message || 'Registration failed', severity: 'error' });
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setSnackbar({ open: true, message: 'Registration failed. Please try again.', severity: 'error' });
+      setSnackbar({ open: true, message: error.message || 'Registration failed', severity: 'error' });
     }
   };
 
