@@ -32,8 +32,5 @@ services:
     healthCheckPath: /api/health
     # Auto-deploy on git push
     autoDeploy: true
-    # Persistent disk for database
-    disk:
-      name: bizmanage-data
-      mountPath: /opt/render/project/src/server
-      sizeGB: 1
+    # Note: Free tier doesn't support persistent disks
+    # Database will be ephemeral (resets on redeploy)
