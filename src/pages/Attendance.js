@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Box,
@@ -89,7 +89,6 @@ const Attendance = () => {
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [openReportDialog, setOpenReportDialog] = useState(false);
-  const [viewMode, setViewMode] = useState('daily');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [reportData, setReportData] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -105,7 +104,7 @@ const Attendance = () => {
     employee_id: ''
   });
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       console.log('Fetching employees for attendance...');
       const response = await fetch('http://localhost:5000/api/employees', {
@@ -138,9 +137,9 @@ const Attendance = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     try {
       console.log('Fetching attendance for date:', selectedDate);
       const response = await fetch(`http://localhost:5000/api/attendance?start_date=${selectedDate}&end_date=${selectedDate}`, {
@@ -161,12 +160,12 @@ const Attendance = () => {
     } catch (error) {
       console.error('Error fetching attendance:', error);
     }
-  };
+  }, [token, selectedDate]);
 
   useEffect(() => {
     fetchEmployees();
     fetchAttendance();
-  }, [selectedDate]);
+  }, [fetchEmployees, fetchAttendance]);
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
