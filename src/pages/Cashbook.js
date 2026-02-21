@@ -6,6 +6,7 @@ import {
   Paper,
   Grid,
   Card,
+  CardContent,
   Button,
   Dialog,
   DialogTitle,
@@ -39,6 +40,7 @@ import {
 import {
   Add as AddIcon,
   Edit as EditIcon,
+  Delete as DeleteIcon,
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   AccountBalanceWallet as AccountBalanceWalletIcon,
