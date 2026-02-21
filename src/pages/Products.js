@@ -34,9 +34,6 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  ShoppingCart as PurchaseIcon,
-  Sell as SaleIcon,
-  TrendingUp as TrendingUpIcon,
   Warning as WarningIcon,
   Refresh as RefreshIcon,
   Search as SearchIcon
@@ -56,7 +53,6 @@ const Products = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [tabValue, setTabValue] = useState(0);
   const [transactions, setTransactions] = useState([]);
-  const [profitability, setProfitability] = useState([]);
   const [stats, setStats] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -139,37 +135,6 @@ const Products = () => {
       console.log('✅ Transactions set:', data.transactions?.length || 0, 'items');
     } catch (error) {
       console.error('❌ Error fetching all transactions:', error);
-    }
-  };
-
-  const fetchTransactions = async (productId) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/products/${productId}/transactions`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      setTransactions(data.transactions || []);
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-    }
-  };
-
-  const fetchProfitabilityData = async () => {
-    try {
-      const endDate = new Date().toISOString().split('T')[0];
-      const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      
-      const response = await fetch(`http://localhost:5000/api/products/profitability/daily?start_date=${startDate}&end_date=${endDate}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      setProfitability(data);
-    } catch (error) {
-      console.error('Error fetching profitability data:', error);
     }
   };
 
@@ -320,10 +285,6 @@ const Products = () => {
       return { color: 'warning', label: 'Low Stock', icon: <WarningIcon /> };
     }
     return { color: 'success', label: 'In Stock', icon: null };
-  };
-
-  const calculateProfit = (product) => {
-    return (product.selling_price - product.purchasing_price) * product.current_quantity;
   };
 
   const handleTabChange = (event, newValue) => {
