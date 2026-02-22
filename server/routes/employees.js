@@ -234,37 +234,32 @@ async function generateEmployeeCode(businessId) {
   console.log('Business ID type:', typeof businessId);
   
   try {
-    // Use transaction to prevent race conditions
-    const newCode = await db.transaction(async (trx) => {
-      // Simple approach: use timestamp + random to ensure uniqueness
-      const timestamp = Date.now().toString().slice(-6);
-      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      const uniqueCode = `${prefix}${timestamp}${randomSuffix}`;
-      
-      console.log('Generated unique employee code:', uniqueCode);
-      
-      // Double-check if this code exists (shouldn't with timestamp + random)
-      const exists = await trx('employees')
-        .where({ 
-          business_id: businessId, 
-          employee_code: uniqueCode 
-        })
-        .first();
-      
-      if (exists) {
-        // Extremely unlikely, but handle it
-        console.log('Code already exists, generating another one');
-        const fallbackTimestamp = Date.now().toString().slice(-6);
-        const fallbackRandom = Math.floor(Math.random() * 9999).toString().padStart(4, '0');
-        const fallbackCode = `${prefix}${fallbackTimestamp}${fallbackRandom}`;
-        console.log('Using fallback code:', fallbackCode);
-        return fallbackCode;
-      }
-      
-      return uniqueCode;
-    });
+    // Simple approach: use timestamp + random to ensure uniqueness
+    const timestamp = Date.now().toString().slice(-6);
+    const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const uniqueCode = `${prefix}${timestamp}${randomSuffix}`;
     
-    return newCode;
+    console.log('Generated unique employee code:', uniqueCode);
+    
+    // Double-check if this code exists (shouldn't with timestamp + random)
+    const exists = await db('employees')
+      .where({ 
+        business_id: businessId, 
+        employee_code: uniqueCode 
+      })
+      .first();
+    
+    if (exists) {
+      // Extremely unlikely, but handle it
+      console.log('Code already exists, generating another one');
+      const fallbackTimestamp = Date.now().toString().slice(-6);
+      const fallbackRandom = Math.floor(Math.random() * 9999).toString().padStart(4, '0');
+      const fallbackCode = `${prefix}${fallbackTimestamp}${fallbackRandom}`;
+      console.log('Using fallback code:', fallbackCode);
+      return fallbackCode;
+    }
+    
+    return uniqueCode;
   } catch (error) {
     console.error('Error generating employee code:', error);
     // Fallback to simple timestamp-based code
