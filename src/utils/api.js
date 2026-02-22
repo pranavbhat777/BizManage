@@ -1,6 +1,12 @@
-// API Configuration Utility - Dynamic URL based on environment
+// API Configuration Utility - Always use production URL for mobile apps
 const getApiBaseUrl = () => {
-  // If running in browser and not localhost, use current domain (for tunnels)
+  // Always use production API URL for mobile apps
+  if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.isNative) {
+    // Mobile app - always use production API
+    return 'https://bizmanage-api.onrender.com';
+  }
+  
+  // Web app - use environment variable or localhost
   if (typeof window !== 'undefined') {
     const currentHost = window.location.hostname;
     
