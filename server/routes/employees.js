@@ -7,27 +7,31 @@ const router = express.Router();
 // Initialize database table if needed
 const initializeEmployeesTable = async () => {
   try {
-    const hasTable = await db.schema.hasTable('employees');
-    if (!hasTable) {
-      console.log('📋 Creating employees table...');
-      await db.schema.createTable('employees', (table) => {
-        table.increments('id').primary();
-        table.integer('business_id').notNullable();
-        table.string('first_name').notNullable();
-        table.string('last_name').notNullable();
-        table.string('email').nullable();
-        table.string('phone').nullable();
-        table.string('position').nullable();
-        table.decimal('salary', 10, 2).nullable();
-        table.string('salary_type').nullable();
-        table.date('join_date').nullable();
-        table.string('employee_code').nullable().unique();
-        table.boolean('active').defaultTo(true);
-        table.timestamps(true, true);
-      });
-      console.log('✅ Employees table created');
-      
-      // Add sample employees
+    console.log('🔧 Checking database...');
+    
+    // Simple table creation without complex checks
+    await db.schema.createTableIfNotExists('employees', (table) => {
+      table.increments('id').primary();
+      table.integer('business_id').notNullable();
+      table.string('first_name').notNullable();
+      table.string('last_name').notNullable();
+      table.string('email').nullable();
+      table.string('phone').nullable();
+      table.string('position').nullable();
+      table.decimal('salary', 10, 2).nullable();
+      table.string('salary_type').nullable();
+      table.date('join_date').nullable();
+      table.string('employee_code').nullable();
+      table.boolean('active').defaultTo(true);
+      table.timestamps(true, true);
+    });
+    
+    console.log('✅ Employees table ensured');
+    
+    // Check if we have data and add sample if needed
+    const existingEmployees = await db('employees').count('* as count').first();
+    if (existingEmployees.count === 0) {
+      console.log('📝 Adding sample employees...');
       await db('employees').insert([
         {
           business_id: 1,
