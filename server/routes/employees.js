@@ -4,6 +4,72 @@ const db = require('../config/database');
 
 const router = express.Router();
 
+// Initialize database table if needed
+const initializeEmployeesTable = async () => {
+  try {
+    const hasTable = await db.schema.hasTable('employees');
+    if (!hasTable) {
+      console.log('📋 Creating employees table...');
+      await db.schema.createTable('employees', (table) => {
+        table.increments('id').primary();
+        table.integer('business_id').notNullable();
+        table.string('first_name').notNullable();
+        table.string('last_name').notNullable();
+        table.string('email').nullable();
+        table.string('phone').nullable();
+        table.string('position').nullable();
+        table.decimal('salary', 10, 2).nullable();
+        table.string('salary_type').nullable();
+        table.date('join_date').nullable();
+        table.string('employee_code').nullable().unique();
+        table.boolean('active').defaultTo(true);
+        table.timestamps(true, true);
+      });
+      console.log('✅ Employees table created');
+      
+      // Add sample employees
+      await db('employees').insert([
+        {
+          business_id: 1,
+          first_name: 'John',
+          last_name: 'Doe',
+          email: 'john@company.com',
+          phone: '+1234567890',
+          position: 'Manager',
+          salary: 50000.00,
+          salary_type: 'monthly',
+          join_date: new Date().toISOString().split('T')[0],
+          employee_code: 'EMP001',
+          active: true,
+          created_at: new Date(),
+          updated_at: new Date()
+        },
+        {
+          business_id: 1,
+          first_name: 'Jane',
+          last_name: 'Smith',
+          email: 'jane@company.com',
+          phone: '+0987654321',
+          position: 'Developer',
+          salary: 60000.00,
+          salary_type: 'monthly',
+          join_date: new Date().toISOString().split('T')[0],
+          employee_code: 'EMP002',
+          active: true,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ]);
+      console.log('✅ Sample employees added');
+    }
+  } catch (error) {
+    console.error('❌ Database initialization error:', error);
+  }
+};
+
+// Initialize table on first request
+initializeEmployeesTable();
+
 // Get all employees for a business
 router.get('/', async (req, res) => {
   try {
